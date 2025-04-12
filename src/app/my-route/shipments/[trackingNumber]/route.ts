@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
 
-export const GET = async (
-  req: NextRequest,
-  context: { params: Record<string, string> }
-) => {
-  const trackingNumber = context.params.trackingNumber;
+// Use correct type for context
+interface Context {
+  params: {
+    trackingNumber: string;
+  };
+}
+
+export async function GET(req: NextRequest, { params }: Context) {
+  const trackingNumber = params.trackingNumber;
 
   try {
     const payload = await getPayload({ config: configPromise });
@@ -42,4 +46,4 @@ export const GET = async (
       { status: 500 }
     );
   }
-};
+}
