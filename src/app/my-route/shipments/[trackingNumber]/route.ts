@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
 
 export const GET = async (
   req: NextRequest,
-  { params }: { params: { trackingNumber: string } }
+  context: { params: { trackingNumber: string } }
 ) => {
+  const { trackingNumber } = context.params;
+
   try {
     const payload = await getPayload({ config: configPromise });
 
@@ -13,7 +16,7 @@ export const GET = async (
       collection: 'shipments',
       where: {
         trackingNumber: {
-          equals: params.trackingNumber,
+          equals: trackingNumber,
         },
       },
     });
