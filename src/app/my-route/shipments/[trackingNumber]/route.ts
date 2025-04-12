@@ -5,9 +5,9 @@ import configPromise from '@payload-config';
 
 export const GET = async (
   req: NextRequest,
-  context: { params: { trackingNumber: string } }
+  context: { params: Record<string, string | string[]> }
 ) => {
-  const { trackingNumber } = context.params;
+  const trackingNumber = context.params.trackingNumber as string;
 
   try {
     const payload = await getPayload({ config: configPromise });
