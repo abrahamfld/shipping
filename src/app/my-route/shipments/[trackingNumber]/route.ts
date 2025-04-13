@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
+import type { NextRequest as ReqType } from 'next/server';
 
-// Use correct type for context
-interface Context {
+type Context = {
   params: {
     trackingNumber: string;
   };
-}
+};
 
-export async function GET(req: NextRequest, { params }: Context) {
+export async function GET(req: ReqType, { params }: Context) {
   const trackingNumber = params.trackingNumber;
 
   try {
@@ -35,13 +35,15 @@ export async function GET(req: NextRequest, { params }: Context) {
       success: true,
       shipment: result.docs[0],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown error occurred';
     console.error('Error fetching shipment:', error);
     return NextResponse.json(
       {
         success: false,
         message: 'Failed to fetch shipment',
-        error: error.message,
+        error: message,
       },
       { status: 500 }
     );
