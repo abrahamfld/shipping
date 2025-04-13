@@ -9,7 +9,7 @@ type Context = {
   };
 };
 
-export async function GET(req: ReqType, { params }: Context) {
+export async function GET(req: ReqType, { params }: any) {
   const trackingNumber = params.trackingNumber;
 
   try {
