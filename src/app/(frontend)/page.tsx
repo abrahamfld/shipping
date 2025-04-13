@@ -44,6 +44,9 @@ export default function HomePage() {
   useEffect(() => {
     const fetchShipments = async () => {
       try {
+        // 2-second delay
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+  
         const res = await fetch('/my-route/shipments');
         const data = await res.json();
         if (data.success) {
@@ -55,9 +58,10 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
+  
     fetchShipments();
   }, []);
+  ;
 
   const handleSearch = (trackingNumber: string) => {
     setSearch(trackingNumber);
