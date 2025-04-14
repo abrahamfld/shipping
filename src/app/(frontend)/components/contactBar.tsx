@@ -1,19 +1,20 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 const ContactBar = () => {
   return (
     <div className="bg-emerald-600 text-white flex items-center justify-between p-4">
       {/* Company Logo and Name */}
-      <div className="flex items-center space-x-3">
+      <Link href="/" className="flex items-center space-x-3 hover:opacity-90 transition">
         <img
           src="/logo.png"
           alt="Company Logo"
           className="h-8 md:h-12"
         />
         <span className="text-xl font-bold">Global Shipping</span>
-      </div>
+      </Link>
 
       {/* WhatsApp Contact */}
       <div>

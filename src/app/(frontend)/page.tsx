@@ -1,216 +1,149 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { ArrowRight, MapPin, Clock, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
 
-interface TrackingHistoryItem {
-  id: string;
-  date: string;
-  location: string;
-  remark: string;
-  status: string;
-}
-
-interface Shipment {
-  id: number;
-  trackingNumber: string;
-  shipmentDetails: {
-    quantity: number;
-    weight: string;
-    serviceType: string;
-    description?: string;
-  };
-  destination: {
-    receiverName: string;
-    receiverEmail: string;
-    receiverAddress?: string;
-    expectedDeliveryDate?: string;
-  };
-  origin: {
-    senderName: string;
-    location?: string;
-    shipmentDate?: string;
-  };
-  trackingHistory: TrackingHistoryItem[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export default function HomePage() {
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [filtered, setFiltered] = useState<Shipment[]>([]);
-  const [search, setSearch] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
+export default function LandingPage() {
+  const imageList = ['/1.png', '/2.png', '/3.png'];
+  const [currentImage, setCurrentImage] = useState(imageList[0]);
 
   useEffect(() => {
-    const fetchShipments = async () => {
-      try {
-        // 2-second delay
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-  
-        const res = await fetch('/my-route/shipments');
-        const data = await res.json();
-        if (data.success) {
-          setShipments(data.shipments);
-        }
-      } catch (error) {
-        console.error('Error fetching shipments:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchShipments();
-  }, []);
-  ;
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * imageList.length);
+      setCurrentImage(imageList[randomIndex]);
+    }, 4000); // change every 4 seconds
 
-  const handleSearch = (trackingNumber: string) => {
-    setSearch(trackingNumber);
-    const filteredResults = shipments.filter((shipment) =>
-      shipment.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase())
-    );
-    setFiltered(filteredResults);
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <main className="flex flex-col min-h-screen bg-gray-50">
-      {/* Hero/Search Section */}
-      <section className="bg-emerald-600 text-white py-12 flex flex-col justify-center items-center space-y-6 text-center">
-        <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
-          Track Your Shipments Easily
-        </h1>
-        <p className="text-lg sm:text-xl">
-          Enter your tracking number below to find your shipment details.
-        </p>
-        <input
-          type="text"
-          placeholder="Enter Tracking Number"
-          className="w-80 sm:w-96 p-4 rounded-xl text-lg border border-white bg-white text-emerald-700 placeholder-emerald-400 shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-300"
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
+    <main className="min-h-screen bg-gradient-to-br from-emerald-100 via-white to-emerald-50 text-gray-800">
+      {/* Hero Section */}
+      <section className="px-6 md:px-16 py-12 flex items-center justify-center">
+        <div className="max-w-7xl w-full grid md:grid-cols-2 gap-12 items-center">
+          {/* Text Section */}
+          <motion.div
+            className="space-y-6"
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-emerald-700">
+              Deliver Smarter, Track Faster.
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-700">
+              Discover the future of shipment tracking. Real-time updates, detailed history, and beautiful modern design — all in one place.
+            </p>
+
+            <Link
+              href="/tracking"
+              className="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium text-white bg-emerald-600 rounded-full shadow-lg hover:bg-emerald-700 transition"
+            >
+              Track Shipment <ArrowRight size={20} />
+            </Link>
+          </motion.div>
+
+          {/* Image Section with Random Image Change */}
+          <motion.div
+            key={currentImage} // key triggers framer-motion animation when image changes
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="relative"
+          >
+            <Image
+              src={currentImage}
+              alt="Courier on Bike"
+              width={500}
+              height={500}
+              className="w-full h-auto object-contain drop-shadow-2xl"
+              priority
+            />
+          </motion.div>
+        </div>
       </section>
 
-      {/* Loading */}
-      {loading ? (
-        <section className="flex justify-center items-center py-20">
-          <img src="/loading.gif" alt="Loading..." className="w-16 h-16" />
-          
-        </section>
-      ) : search ? (
-        <section className="px-4 sm:px-8 py-8">
-          <h2 className="text-3xl font-bold mb-6 text-center text-emerald-700">
-            Shipment Details
-          </h2>
-
-          {filtered.length > 0 ? (
-            <div className="flex flex-col gap-10">
-              {filtered.map((shipment) => (
-                <div
-                  key={shipment.id}
-                  className="flex flex-col gap-6"
-                >
-                  {/* Shipment Details Card */}
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
-                      <h3 className="text-xl font-semibold text-emerald-600">Shipment Details</h3>
-                      <div className="mt-4 text-gray-700">
-                        <p><strong>Quantity:</strong> {shipment.shipmentDetails.quantity}</p>
-                        <p><strong>Weight:</strong> {shipment.shipmentDetails.weight} kg</p>
-                        <p><strong>Service Type:</strong> {shipment.shipmentDetails.serviceType}</p>
-                        {shipment.shipmentDetails.description && (
-                          <p>
-                            <strong>Description:</strong>{' '}
-                            <span
-                              className={
-                                /hold|on hold/i.test(shipment.shipmentDetails.description)
-                                  ? 'text-rose-600 font-semibold'
-                                  : 'text-gray-700'
-                              }
-                            >
-                              {shipment.shipmentDetails.description}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Destination Card */}
-                    <div className="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
-                      <h3 className="text-xl font-semibold text-emerald-600">Destination</h3>
-                      <div className="mt-4 text-gray-700">
-                        <p><strong>Receiver Name:</strong> {shipment.destination.receiverName}</p>
-                        <p><strong>Receiver Email:</strong> {shipment.destination.receiverEmail}</p>
-                        {shipment.destination.receiverAddress && (
-                          <p><strong>Receiver Address:</strong> {shipment.destination.receiverAddress}</p>
-                        )}
-                        {shipment.destination.expectedDeliveryDate && (
-                          <p><strong>Expected Delivery Date:</strong> {new Date(shipment.destination.expectedDeliveryDate).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Origin Card */}
-                    <div className="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
-                      <h3 className="text-xl font-semibold text-emerald-600">Origin</h3>
-                      <div className="mt-4 text-gray-700">
-                        <p><strong>Sender Name:</strong> {shipment.origin.senderName}</p>
-                        {shipment.origin.location && (
-                          <p><strong>Location:</strong> {shipment.origin.location}</p>
-                        )}
-                        {shipment.origin.shipmentDate && (
-                          <p><strong>Shipment Date:</strong> {new Date(shipment.origin.shipmentDate).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tracking History */}
-                  {shipment.trackingHistory?.length > 0 && (
-  <div className="bg-white p-6 rounded-xl shadow-md">
-    <h3 className="text-xl font-semibold text-emerald-600 mb-4">Shipment History</h3>
-    <ul className="space-y-4">
-      {shipment.trackingHistory.map((item) => (
-        <li
-          key={item.id}
-          className={`border-l-4 pl-4 ${
-            item.status === "on-hold" || item.status === "lost"
-              ? "border-red-600 text-red-600"
-              : "border-emerald-500 text-gray-800"
-          }`}
-        >
-          <p><strong>Date:</strong> {new Date(item.date).toLocaleDateString()}</p>
-          <p><strong>Location:</strong> {item.location}</p>
-          <p>
-            <strong>Status:</strong>{" "}
-            <span
-              className={`capitalize ${
-                item.status === "on-hold" || item.status === "lost"
-                  ? "text-red-600"
-                  : "text-gray-700"
-              }`}
-            >
-              {item.status}
-            </span>
+      {/* Features Section */}
+      <section className="px-6 md:px-16 py-20 bg-white">
+        <div className="max-w-6xl mx-auto text-center">
+          <motion.h2
+            className="text-3xl sm:text-4xl font-bold text-emerald-700 mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            Why Choose Our Platform?
+          </motion.h2>
+          <p className="text-gray-600 mb-12">
+            Powerful tools, real-time insights, and peace of mind — everything you need to track your deliveries effortlessly.
           </p>
-          <p><strong>Remark:</strong> {item.remark}</p>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
 
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">No shipments match that tracking number.</p>
-          )}
-        </section>
-      ) : (
-        <section className="text-center text-gray-500 py-10">
-          <p>Start by typing a tracking number above to view shipment details.</p>
-        </section>
-      )}
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10">
+            {/* Feature 1 */}
+            <motion.div
+              className="bg-emerald-50 p-6 rounded-xl shadow hover:shadow-lg transition"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <MapPin className="text-emerald-600 w-10 h-10 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Live Location Updates</h3>
+              <p className="text-gray-600">Know where your package is, every step of the way. We provide accurate, real-time tracking data.</p>
+            </motion.div>
+
+            {/* Feature 2 */}
+            <motion.div
+              className="bg-emerald-50 p-6 rounded-xl shadow hover:shadow-lg transition"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Clock className="text-emerald-600 w-10 h-10 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Fast Delivery Tracking</h3>
+              <p className="text-gray-600">Speed is everything. Our system updates fast so you’re never left guessing or waiting for info.</p>
+            </motion.div>
+
+            {/* Feature 3 */}
+            <motion.div
+              className="bg-emerald-50 p-6 rounded-xl shadow hover:shadow-lg transition"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <ShieldCheck className="text-emerald-600 w-10 h-10 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Secure & Reliable</h3>
+              <p className="text-gray-600">Built with security and stability in mind so your data and packages are always protected.</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+      {/* Call to Action Section */}
+<section className="py-12 bg-white text-center">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    viewport={{ once: true }}
+  >
+    <h3 className="text-2xl font-semibold mb-4 text-emerald-700">
+      Ready to track your next shipment?
+    </h3>
+    <Link
+      href="/tracking"
+      className="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium text-white bg-emerald-600 rounded-full shadow-lg hover:bg-emerald-700 transition"
+    >
+      Track Shipment <ArrowRight size={20} />
+    </Link>
+  </motion.div>
+</section>
+
     </main>
   );
 }
