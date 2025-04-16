@@ -106,34 +106,34 @@ export default function HomePage() {
   return (
     <main className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white py-16 px-6 sm:px-0 flex flex-col justify-center items-center space-y-6 text-center">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-          Track Your Shipment
-        </h1>
-        <p className="text-lg sm:text-xl max-w-xl">
-          Enter your complete tracking number to view shipment details.
-        </p>
-        <div className="w-full max-w-md flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter complete tracking number"
-            className="flex-1 p-4 rounded-xl text-lg border border-white bg-white text-emerald-700 placeholder-emerald-400 shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-300 transition-all duration-300"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-white text-emerald-700 font-bold py-4 px-6 rounded-xl hover:bg-emerald-50 transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-300 disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? 'Loading...' : 'Search'}
-          </button>
-        </div>
-        {error && (
-          <p className="text-rose-200 font-medium mt-2">{error}</p>
-        )}
-      </section>
+<section className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white py-16 px-4 sm:px-6 flex flex-col justify-center items-center space-y-6 text-center">
+  <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+    Track Your Shipment
+  </h1>
+  <p className="text-base sm:text-xl max-w-xl">
+    Enter your complete tracking number to view shipment details.
+  </p>
+  <div className="w-full px-4 sm:px-0 max-w-md flex flex-col sm:flex-row gap-2">
+    <input
+      type="text"
+      placeholder="Enter tracking number"
+      className="flex-1 p-3 sm:p-4 rounded-xl text-base sm:text-lg border border-white bg-white text-emerald-700 placeholder-emerald-400 shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-300 transition-all duration-300"
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      onKeyDown={handleKeyDown}
+    />
+    <button
+      onClick={handleSearch}
+      className="bg-white text-emerald-700 font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-xl hover:bg-emerald-50 transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-300 disabled:opacity-50"
+      disabled={loading}
+    >
+      {loading ? 'Loading...' : 'Search'}
+    </button>
+  </div>
+  {error && (
+    <p className="text-rose-200 font-medium mt-2">{error}</p>
+  )}
+</section>
 
       {/* Loading State */}
       {loading ? (
