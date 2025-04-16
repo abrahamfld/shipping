@@ -85,9 +85,9 @@ export default function HomePage() {
       return;
     }
 
-    // Strict exact match - no partial matching
+    // Case-insensitive exact match
     const exactMatch = shipments.find(
-      (shipment) => shipment.trackingNumber === trimmedSearch
+      (shipment) => shipment.trackingNumber.toLowerCase() === trimmedSearch.toLowerCase()
     );
 
     if (exactMatch) {
