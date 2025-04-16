@@ -70,12 +70,21 @@ export default function HomePage() {
     fetchShipments();
   }, []);
 
-  const handleSearch = (trackingNumber: string) => {
-    setSearch(trackingNumber);
+  const handleSearch = () => {
+    if (!search.trim()) {
+      setFiltered([]);
+      return;
+    }
     const filteredResults = shipments.filter((shipment) =>
-      shipment.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase())
+      shipment.trackingNumber.toLowerCase().includes(search.toLowerCase().trim())
     );
     setFiltered(filteredResults);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -93,7 +102,9 @@ export default function HomePage() {
           placeholder="Enter Tracking Number"
           className="w-full max-w-md p-4 rounded-xl text-lg border border-white bg-white text-emerald-700 placeholder-emerald-400 shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-300 transition-all duration-300"
           value={search}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
+          onBlur={handleSearch}
+          onKeyDown={handleKeyDown}
         />
       </section>
 
@@ -102,7 +113,7 @@ export default function HomePage() {
         <section className="flex justify-center items-center py-20">
           <img src="/loading.gif" alt="Loading..." className="w-16 h-16" />
         </section>
-      ) : search ? (
+      ) : filtered.length > 0 || search ? (
         <section className="px-4 sm:px-8 py-10">
           <h2 className="text-3xl font-bold mb-6 text-center text-emerald-700">
             Shipment Details
