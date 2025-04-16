@@ -50,6 +50,8 @@ export default function HomePage() {
   const [filtered, setFiltered] = useState<Shipment[]>([]);
   const [search, setSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [searched, setSearched] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchShipments = async () => {
@@ -62,6 +64,7 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Error fetching shipments:', error);
+        setError('Failed to load shipments. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -71,14 +74,25 @@ export default function HomePage() {
   }, []);
 
   const handleSearch = () => {
+    setSearched(true);
+    setError('');
+
     if (!search.trim()) {
       setFiltered([]);
+      setError('Please enter a tracking number');
       return;
     }
-    const filteredResults = shipments.filter((shipment) =>
-      shipment.trackingNumber.toLowerCase().includes(search.toLowerCase().trim())
+
+    const exactMatch = shipments.find(
+      (shipment) => shipment.trackingNumber.toLowerCase() === search.toLowerCase().trim()
     );
-    setFiltered(filteredResults);
+
+    if (exactMatch) {
+      setFiltered([exactMatch]);
+    } else {
+      setFiltered([]);
+      setError('No shipment found with that tracking number');
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -97,15 +111,25 @@ export default function HomePage() {
         <p className="text-lg sm:text-xl max-w-xl">
           Enter your tracking number to get the latest shipment updates.
         </p>
-        <input
-          type="text"
-          placeholder="Enter Tracking Number"
-          className="w-full max-w-md p-4 rounded-xl text-lg border border-white bg-white text-emerald-700 placeholder-emerald-400 shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-300 transition-all duration-300"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onBlur={handleSearch}
-          onKeyDown={handleKeyDown}
-        />
+        <div className="w-full max-w-md flex gap-2">
+          <input
+            type="text"
+            placeholder="Enter Tracking Number"
+            className="flex-1 p-4 rounded-xl text-lg border border-white bg-white text-emerald-700 placeholder-emerald-400 shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-300 transition-all duration-300"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-white text-emerald-700 font-bold py-4 px-6 rounded-xl hover:bg-emerald-50 transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-300"
+          >
+            Search
+          </button>
+        </div>
+        {error && !loading && searched && (
+          <p className="text-rose-200 font-medium mt-2">{error}</p>
+        )}
       </section>
 
       {/* Loading State */}
@@ -113,130 +137,135 @@ export default function HomePage() {
         <section className="flex justify-center items-center py-20">
           <img src="/loading.gif" alt="Loading..." className="w-16 h-16" />
         </section>
-      ) : filtered.length > 0 || search ? (
+      ) : error ? (
+        <section className="text-center text-gray-500 py-10">
+          <p>{error}</p>
+        </section>
+      ) : filtered.length > 0 ? (
         <section className="px-4 sm:px-8 py-10">
           <h2 className="text-3xl font-bold mb-6 text-center text-emerald-700">
             Shipment Details
           </h2>
 
-          {filtered.length > 0 ? (
-            <div className="flex flex-col gap-10">
-              {filtered.map((shipment) => (
-                <div key={shipment.id} className="flex flex-col gap-6">
-                  {/* Shipment Cards */}
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Shipment Details */}
-                    <motion.div
-                      variants={cardVariant}
-                      initial="hidden"
-                      animate="visible"
-                      className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow w-full md:w-1/3"
-                    >
-                      <h3 className="text-xl font-bold text-emerald-700">Shipment Details</h3>
-                      <div className="mt-4 space-y-2">
-                        <p><strong>Quantity:</strong> {shipment.shipmentDetails.quantity}</p>
-                        <p><strong>Weight:</strong> {shipment.shipmentDetails.weight} kg</p>
-                        <p><strong>Service Type:</strong> {shipment.shipmentDetails.serviceType}</p>
-                        {shipment.shipmentDetails.description && (
-                          <p>
-                            <strong>Description:</strong>{' '}
-                            <span className={
-                              /hold|customs|lost|delay/i.test(shipment.shipmentDetails.description)
-                                ? 'text-rose-600 font-semibold'
-                                : 'text-gray-700'
-                            }>
-                              {shipment.shipmentDetails.description}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
+          <div className="flex flex-col gap-10">
+            {filtered.map((shipment) => (
+              <div key={shipment.id} className="flex flex-col gap-6">
+                {/* Shipment Cards */}
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Shipment Details */}
+                  <motion.div
+                    variants={cardVariant}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow w-full md:w-1/3"
+                  >
+                    <h3 className="text-xl font-bold text-emerald-700">Shipment Details</h3>
+                    <div className="mt-4 space-y-2">
+                      <p><strong>Tracking Number:</strong> {shipment.trackingNumber}</p>
+                      <p><strong>Quantity:</strong> {shipment.shipmentDetails.quantity}</p>
+                      <p><strong>Weight:</strong> {shipment.shipmentDetails.weight} kg</p>
+                      <p><strong>Service Type:</strong> {shipment.shipmentDetails.serviceType}</p>
+                      {shipment.shipmentDetails.description && (
+                        <p>
+                          <strong>Description:</strong>{' '}
+                          <span className={
+                            /hold|customs|lost|delay/i.test(shipment.shipmentDetails.description)
+                              ? 'text-rose-600 font-semibold'
+                              : 'text-gray-700'
+                          }>
+                            {shipment.shipmentDetails.description}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
 
-                    {/* Destination */}
-                    <motion.div
-                      variants={cardVariant}
-                      initial="hidden"
-                      animate="visible"
-                      className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow w-full md:w-1/3"
-                    >
-                      <h3 className="text-xl font-bold text-emerald-700">Destination</h3>
-                      <div className="mt-4 space-y-2">
-                        <p><strong>Receiver Name:</strong> {shipment.destination.receiverName}</p>
-                        <p><strong>Receiver Email:</strong> {shipment.destination.receiverEmail}</p>
-                        {shipment.destination.receiverAddress && (
-                          <p><strong>Receiver Address:</strong> {shipment.destination.receiverAddress}</p>
-                        )}
-                        {shipment.destination.expectedDeliveryDate && (
-                          <p><strong>Expected Delivery:</strong> {new Date(shipment.destination.expectedDeliveryDate).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                    </motion.div>
+                  {/* Destination */}
+                  <motion.div
+                    variants={cardVariant}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow w-full md:w-1/3"
+                  >
+                    <h3 className="text-xl font-bold text-emerald-700">Destination</h3>
+                    <div className="mt-4 space-y-2">
+                      <p><strong>Receiver Name:</strong> {shipment.destination.receiverName}</p>
+                      <p><strong>Receiver Email:</strong> {shipment.destination.receiverEmail}</p>
+                      {shipment.destination.receiverAddress && (
+                        <p><strong>Receiver Address:</strong> {shipment.destination.receiverAddress}</p>
+                      )}
+                      {shipment.destination.expectedDeliveryDate && (
+                        <p><strong>Expected Delivery:</strong> {new Date(shipment.destination.expectedDeliveryDate).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                  </motion.div>
 
-                    {/* Origin */}
-                    <motion.div
-                      variants={cardVariant}
-                      initial="hidden"
-                      animate="visible"
-                      className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow w-full md:w-1/3"
-                    >
-                      <h3 className="text-xl font-bold text-emerald-700">Origin</h3>
-                      <div className="mt-4 space-y-2">
-                        <p><strong>Sender Name:</strong> {shipment.origin.senderName}</p>
-                        {shipment.origin.location && <p><strong>Location:</strong> {shipment.origin.location}</p>}
-                        {shipment.origin.shipmentDate && (
-                          <p><strong>Shipment Date:</strong> {new Date(shipment.origin.shipmentDate).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                    </motion.div>
-                  </div>
-
-                  {/* Tracking History */}
-                  {shipment.trackingHistory?.length > 0 && (
-                    <motion.div
-                      variants={cardVariant}
-                      initial="hidden"
-                      animate="visible"
-                      className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-lg border border-gray-200"
-                    >
-                      <h3 className="text-xl font-bold text-emerald-700 mb-4">Shipment History</h3>
-                      <ul className="space-y-4">
-                        {shipment.trackingHistory.map((item, index) => (
-                          <motion.li
-                            key={item.id}
-                            variants={cardVariant}
-                            initial="hidden"
-                            animate="visible"
-                            transition={{ delay: index * 0.1 }}
-                            className={`relative border-l-4 pl-6 py-4 bg-white/60 backdrop-blur-md rounded-lg shadow ${
-                              isProblemStatus(item.status)
-                                ? 'border-rose-600 text-rose-600'
-                                : 'border-emerald-500 text-gray-800'
-                            }`}
-                          >
-                            <span className={`absolute -left-2 top-5 w-3 h-3 rounded-full ${
-                              isProblemStatus(item.status)
-                                ? 'bg-rose-600'
-                                : 'bg-emerald-500'
-                            }`} />
-                            <p><strong>Date:</strong> {new Date(item.date).toLocaleDateString()}</p>
-                            <p><strong>Location:</strong> {item.location}</p>
-                            <p><strong>Status:</strong> <span className="capitalize">{item.status}</span></p>
-                            <p><strong>Remark:</strong> {item.remark}</p>
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  )}
+                  {/* Origin */}
+                  <motion.div
+                    variants={cardVariant}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow w-full md:w-1/3"
+                  >
+                    <h3 className="text-xl font-bold text-emerald-700">Origin</h3>
+                    <div className="mt-4 space-y-2">
+                      <p><strong>Sender Name:</strong> {shipment.origin.senderName}</p>
+                      {shipment.origin.location && <p><strong>Location:</strong> {shipment.origin.location}</p>}
+                      {shipment.origin.shipmentDate && (
+                        <p><strong>Shipment Date:</strong> {new Date(shipment.origin.shipmentDate).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                  </motion.div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">No shipments match that tracking number.</p>
-          )}
+
+                {/* Tracking History */}
+                {shipment.trackingHistory?.length > 0 && (
+                  <motion.div
+                    variants={cardVariant}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-lg border border-gray-200"
+                  >
+                    <h3 className="text-xl font-bold text-emerald-700 mb-4">Shipment History</h3>
+                    <ul className="space-y-4">
+                      {shipment.trackingHistory.map((item, index) => (
+                        <motion.li
+                          key={item.id}
+                          variants={cardVariant}
+                          initial="hidden"
+                          animate="visible"
+                          transition={{ delay: index * 0.1 }}
+                          className={`relative border-l-4 pl-6 py-4 bg-white/60 backdrop-blur-md rounded-lg shadow ${
+                            isProblemStatus(item.status)
+                              ? 'border-rose-600 text-rose-600'
+                              : 'border-emerald-500 text-gray-800'
+                          }`}
+                        >
+                          <span className={`absolute -left-2 top-5 w-3 h-3 rounded-full ${
+                            isProblemStatus(item.status)
+                              ? 'bg-rose-600'
+                              : 'bg-emerald-500'
+                          }`} />
+                          <p><strong>Date:</strong> {new Date(item.date).toLocaleDateString()}</p>
+                          <p><strong>Location:</strong> {item.location}</p>
+                          <p><strong>Status:</strong> <span className="capitalize">{item.status}</span></p>
+                          <p><strong>Remark:</strong> {item.remark}</p>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       ) : (
         <section className="text-center text-gray-500 py-10">
-          <p>Start by typing a tracking number above to view shipment details.</p>
+          {searched ? (
+            <p>No shipment found with that tracking number.</p>
+          ) : (
+            <p>Enter a tracking number and click Search to view shipment details.</p>
+          )}
         </section>
       )}
     </main>
