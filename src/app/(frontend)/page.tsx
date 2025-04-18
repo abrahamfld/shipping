@@ -10,15 +10,40 @@ export default function LandingPage() {
   const imageList = ['/1.png', '/2.png', '/3.png'];
   const [currentImage, setCurrentImage] = useState(imageList[0]);
 
+  // Function to ping the server
+  const pingServer = async () => {
+    try {
+      // Ping the root URL of the application
+      await fetch(window.location.origin, {
+        method: 'HEAD', // Using HEAD method to minimize data transfer
+        cache: 'no-store',
+      });
+      console.log('Server pinged successfully');
+    } catch (error) {
+      console.error('Error pinging server:', error);
+    }
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
+    // Set up interval for image changing
+    const imageInterval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * imageList.length);
       setCurrentImage(imageList[randomIndex]);
     }, 4000); // change every 4 seconds
 
-    return () => clearInterval(interval);
+    // Set up interval for server pinging (every 5 minutes)
+    const pingInterval = setInterval(pingServer, 5 * 60 * 1000);
+    
+    // Ping immediately when component mounts
+    pingServer();
+
+    return () => {
+      clearInterval(imageInterval);
+      clearInterval(pingInterval);
+    };
   }, []);
 
+  // Rest of your component remains the same...
   return (
     <main className="min-h-screen bg-gradient-to-br from-emerald-100 via-white to-emerald-50 text-gray-800">
       {/* Hero Section */}
@@ -106,7 +131,7 @@ export default function LandingPage() {
             >
               <Clock className="text-emerald-600 w-10 h-10 mb-4" />
               <h3 className="text-xl font-semibold mb-2">Fast Delivery Tracking</h3>
-              <p className="text-gray-600">Speed is everything. Our system updates fast so you’re never left guessing or waiting for info.</p>
+              <p className="text-gray-600">Speed is everything. Our system updates fast so you're never left guessing or waiting for info.</p>
             </motion.div>
 
             {/* Feature 3 */}
@@ -125,25 +150,24 @@ export default function LandingPage() {
         </div>
       </section>
       {/* Call to Action Section */}
-<section className="py-12 bg-white text-center">
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6 }}
-    viewport={{ once: true }}
-  >
-    <h3 className="text-2xl font-semibold mb-4 text-emerald-700">
-      Ready to track your next shipment?
-    </h3>
-    <Link
-      href="/tracking"
-      className="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium text-white bg-emerald-600 rounded-full shadow-lg hover:bg-emerald-700 transition"
-    >
-      Track Shipment <ArrowRight size={20} />
-    </Link>
-  </motion.div>
-</section>
-
+      <section className="py-12 bg-white text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h3 className="text-2xl font-semibold mb-4 text-emerald-700">
+            Ready to track your next shipment?
+          </h3>
+          <Link
+            href="/tracking"
+            className="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium text-white bg-emerald-600 rounded-full shadow-lg hover:bg-emerald-700 transition"
+          >
+            Track Shipment <ArrowRight size={20} />
+          </Link>
+        </motion.div>
+      </section>
     </main>
   );
 }
