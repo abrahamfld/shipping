@@ -563,8 +563,9 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">No Shipment Found</h3>
                 <p className="text-gray-600 mb-6">
-                  We couldn't find any shipment with that tracking number. Please check the number and try again.
-                </p>
+  We couldn&apos;t find any shipment with that tracking number. Please check the number and try again.
+</p>
+                
                 <button
                   onClick={() => setSearched(false)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
